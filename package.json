@@ -1,0 +1,47 @@
+{
+	"name": "directus-extension-stream-token",
+	"description": "Directus extension to generate Stream.io video tokens",
+	"icon": "videocam",
+	"version": "1.0.0",
+	"license": "MIT",
+	"keywords": [
+		"directus",
+		"directus-extension",
+		"directus-extension-endpoint",
+		"stream-io",
+		"video-token"
+	],
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"directus:extension": {
+		"type": "endpoint",
+		"path": "dist/index.js",
+		"source": "src/index.ts",
+		"host": "^10.10.0"
+	},
+	"scripts": {
+		"build": "directus-extension build",
+		"dev": "directus-extension build -w --no-minify",
+		"link": "directus-extension link",
+		"validate": "directus-extension validate",
+		"test": "node --experimental-vm-modules $(yarn bin jest)",
+		"lint": "eslint src --ext .ts"
+	},
+	"packageManager": "yarn@1.22.22",
+	"dependencies": {
+		"@stream-io/node-sdk": "0.7.15"
+	},
+	"devDependencies": {
+		"@directus/extensions-sdk": "16.0.2",
+		"@types/jest": "^29.5.12",
+		"@types/node": "^24.9.1",
+		"@typescript-eslint/eslint-plugin": "^7.18.0",
+		"@typescript-eslint/parser": "^7.18.0",
+		"eslint": "^8.57.0",
+		"jest": "^29.7.0",
+		"ts-jest": "^29.2.5",
+		"typescript": "^5.9.3"
+	}
+}
