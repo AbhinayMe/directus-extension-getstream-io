@@ -14,14 +14,20 @@ verification steps.
 
 ## What Happens When You Publish
 
+## What Happens When You Publish
+
 Each publish automatically:
 
-1. **Generates version** — Creates unique date-based version with counter (e.g., `2025.10.30-001`)
-2. **Updates package.json** — Sets the new version
-3. **Builds & tests** — Runs full build, test suite, and linting
-4. **Publishes to npm** — Uploads package to npmjs.com
-5. **Creates git tag** — Tags the release (e.g., `v2025.10.30-001`)
-6. **Creates GitHub Release** — Generates release page with notes and install instructions
+1. **Generates version** — Creates unique date-based version with leading zeros (e.g., `2025.10.30-001`)
+2. **Updates package.json** — Sets the new version using `jq` to preserve leading zeros
+3. **Updates CHANGELOG.md** — Moves `[Unreleased]` content to new version section with release date
+4. **Commits changes** — Commits updated CHANGELOG and package.json to main branch with `[skip ci]`
+5. **Builds & tests** — Runs full build, test suite, and linting
+6. **Publishes to npm** — Uploads package to npmjs.com with the exact version
+7. **Creates git tag** — Tags the release (e.g., `v2025.10.30-001`)
+8. **Creates GitHub Release** — Generates release page with changelog, notes, and install instructions
+
+> **Note:** The `[skip ci]` marker prevents the changelog commit from triggering another build.
 
 ## Automatic Versioning
 
@@ -42,8 +48,17 @@ The workflow automatically generates version numbers based on the current date w
 - ✅ Version indicates when it was published
 - ✅ Sequential counter shows release order for the day
 - ✅ No version conflicts
+- ✅ Leading zeros preserved in package.json and npm
 
-The workflow automatically updates `package.json` before publishing, so you don't need to manually bump versions.
+**How version generation works:**
+
+1. Queries npm registry for existing versions published today
+2. Checks git tags for releases created today
+3. Uses the higher count to avoid conflicts
+4. Increments counter and formats with leading zeros (`001`, `002`, etc.)
+5. Verifies the version doesn't exist on npm before publishing
+
+The workflow automatically updates `package.json` before publishing using `jq` (not `npm version`) to preserve leading zeros.
 
 ## Required secret
 
@@ -91,6 +106,39 @@ However, the CI will override this with the auto-generated date-based version.
   for credentials instead.
 
 ## How to Trigger Publishing
+
+### Before Publishing
+
+**Update the CHANGELOG:**
+
+Before merging to `publish` or triggering a manual publish, add your changes to the `[Unreleased]` section in `docs/CHANGELOG.md`:
+
+```markdown
+## [Unreleased]
+
+### Added
+
+- New feature or endpoint
+
+### Changed
+
+- Updated behavior or API
+
+### Fixed
+
+- Bug fixes
+
+### Improved
+
+- Performance or documentation improvements
+```
+
+The workflow will automatically:
+
+- Move these entries to a new version section
+- Add the release date
+- Update version comparison links
+- Commit changes back to main branch
 
 ### Method 1: Automatic (Push to `publish` branch)
 

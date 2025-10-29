@@ -79,9 +79,14 @@ jobs:
 
       - name: Update package.json version
         run: |
-          # Update version in package.json
-          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+          # Update version in package.json directly (npm version strips leading zeros)
+          jq --arg version "${{ steps.version.outputs.version }}" '.version = $version' package.json > package.json.tmp
+          mv package.json.tmp package.json
           echo "Updated package.json to version ${{ steps.version.outputs.version }}"
+          
+          # Verify the version was set correctly
+          ACTUAL_VERSION=$(jq -r '.version' package.json)
+          echo "Verified package.json version: $ACTUAL_VERSION"
 
       - name: Build
         run: yarn build
@@ -121,24 +126,6 @@ jobs:
           git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
           git push origin "v${{ steps.version.outputs.version }}"
 
-      - name: Extract latest changelog
-        id: changelog
-        run: |
-          # Extract the Unreleased section from CHANGELOG.md
-          if [ -f "docs/CHANGELOG.md" ]; then
-            # Get content between ## [Unreleased] and the next ## heading
-            CHANGELOG=$(awk '/## \[Unreleased\]/,/## \[/' docs/CHANGELOG.md | sed '1d;$d' | sed '/^$/d')
-            if [ -z "$CHANGELOG" ]; then
-              CHANGELOG="No changelog entries found."
-            fi
-          else
-            CHANGELOG="No changelog available."
-          fi
-          # Save to output using multiline string
-          echo "content<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
@@ -158,9 +145,5 @@ jobs:
             ```
             
             ${{ github.event_name == 'workflow_dispatch' && format('**Trigger reason:** {0}', github.event.inputs.reason) || '' }}
-            
-            ## 📝 Changelog
-            
-            ${{ steps.changelog.outputs.content }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

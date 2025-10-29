@@ -12,31 +12,76 @@ and this project adheres to date-based versioning (`YYYY.M.D-NNN` format).
 
 ### Added
 
-- Automatic date-based versioning with sequential daily counters (`YYYY.M.D-NNN`)
-- GitHub Release creation with auto-generated tags for every publish
-- Manual workflow trigger via GitHub Actions UI with optional reason input
-- Changelog entries automatically included in GitHub Releases
+- Manual script (`scripts/update-changelog.sh`) for semi-automated CHANGELOG versioning
+- `yarn changelog` command to update CHANGELOG with new version
+- Scripts documentation in `scripts/README.md`
+- Git pre-commit hook for CHANGELOG validation
+
+### Changed
+
+- Publishing workflow documentation updated with script-based CHANGELOG management
+- Copilot instructions updated with CHANGELOG automation details
+
+### Fixed
+
+### Improved
+
+- Easier CHANGELOG maintenance with automation script
+
+## [2025.10.29-003] - 2025-10-29
+
+### Added
+
 - Comprehensive documentation reorganized in `docs/` folder:
   - `docs/API.md` — Complete endpoint documentation
   - `docs/PUBLISHING.md` — CI/CD and publishing guide
   - `docs/TROUBLESHOOTING.md` — Common issues and solutions
   - `docs/CHANGELOG.md` — Version history
-- GitHub Actions workflow (`publish.yml`) for automated publishing
 
 ### Changed
 
 - Moved all documentation files to `docs/` directory for better organization
+- Updated all documentation with complete CI/CD workflow details
+
+### Improved
+
+- Better documentation structure and organization
+
+## [2025.10.29-002] - 2025-10-29
+
+### Added
+
+- Automatic date-based versioning with sequential daily counters (`YYYY.M.D-NNN`)
+- GitHub Release creation with auto-generated tags for every publish
+- Manual workflow trigger via GitHub Actions UI with optional reason input
+- Changelog entries automatically included in GitHub Releases from `[Unreleased]` section
+- GitHub Actions status badge in README
+- npm version and download count badges in README
+- GitHub Actions workflow (`publish.yml`) for automated publishing with permissions
+
+### Changed
+
 - Updated npm token instructions to recommend Granular Access Tokens over Classic tokens
-- Simplified README with links to detailed documentation
+- Simplified README with badges and links to detailed documentation
 - CI/CD workflow now automatically generates version numbers (no manual bumps needed)
-- Release tags created automatically on every publish
+- Release tags created automatically on every publish with proper permissions
 - Publishing workflow enhanced with build, test, lint, and release steps
+- Version format uses leading zeros (e.g., `001`, `002`, `003`) preserved in package.json
+- Version generation checks both npm registry and git tags to avoid conflicts
+
+### Fixed
+
+- GitHub Actions bot permission issues (added `contents: write` and `packages: write`)
+- Version number leading zeros preservation (using `jq` instead of `npm version`)
+- Duplicate version publishing prevention with npm registry checks
+- Git tag fetching with `fetch-depth: 0` for proper version counting
 
 ### Improved
 
 - Better security with Granular Access Token recommendations
-- Cleaner version numbers with daily sequential counters
+- Cleaner version numbers with daily sequential counters and preserved leading zeros
 - Enhanced GitHub Releases with changelog, package info, and install commands
+- Robust version generation with safety checks and conflict resolution
 
 ## [1.0.0] - 2025-10-29
 
@@ -66,5 +111,7 @@ and this project adheres to date-based versioning (`YYYY.M.D-NNN` format).
 - Node.js 22 or higher
 - Stream account with API credentials
 
-[Unreleased]: https://github.com/AbhinayMe/directus-extension-getstream-io/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/AbhinayMe/directus-extension-getstream-io/compare/v2025.10.29-003...HEAD
+[2025.10.29-003]: https://github.com/AbhinayMe/directus-extension-getstream-io/compare/v2025.10.29-002...v2025.10.29-003
+[2025.10.29-002]: https://github.com/AbhinayMe/directus-extension-getstream-io/compare/v1.0.0...v2025.10.29-002
 [1.0.0]: https://github.com/AbhinayMe/directus-extension-getstream-io/releases/tag/v1.0.0
