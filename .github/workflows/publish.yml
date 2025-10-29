@@ -44,8 +44,19 @@ jobs:
           # Fetch all tags to find existing releases for today
           git fetch --tags
           
-          # Count existing tags for today's date
-          COUNT=$(git tag -l "v${DATE}-*" | wc -l | tr -d ' ')
+          # Get all published versions from npm for today's date
+          NPM_VERSIONS=$(npm view directus-extension-getstream-io versions --json 2>/dev/null || echo "[]")
+          TODAY_VERSIONS=$(echo "$NPM_VERSIONS" | jq -r ".[] | select(startswith(\"${DATE}-\"))" | wc -l | tr -d ' ')
+          
+          # Count existing git tags for today's date
+          TAG_COUNT=$(git tag -l "v${DATE}-*" | wc -l | tr -d ' ')
+          
+          # Use the higher count to avoid conflicts
+          if [ "$TODAY_VERSIONS" -gt "$TAG_COUNT" ]; then
+            COUNT=$TODAY_VERSIONS
+          else
+            COUNT=$TAG_COUNT
+          fi
           
           # Increment counter for new release
           COUNTER=$((COUNT + 1))
@@ -54,6 +65,15 @@ jobs:
           COUNTER_FORMATTED=$(printf "%03d" $COUNTER)
           
           VERSION="${DATE}-${COUNTER_FORMATTED}"
+          
+          # Final safety check if this exact version already exists on npm
+          while npm view directus-extension-getstream-io@${VERSION} version 2>/dev/null; do
+            echo "⚠️ Version ${VERSION} already exists on npm, incrementing..."
+            COUNTER=$((COUNTER + 1))
+            COUNTER_FORMATTED=$(printf "%03d" $COUNTER)
+            VERSION="${DATE}-${COUNTER_FORMATTED}"
+          done
+          
           echo "Generated version: $VERSION (release #${COUNTER} for ${DATE})"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
