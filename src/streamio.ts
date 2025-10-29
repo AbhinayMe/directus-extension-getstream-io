@@ -1,11 +1,11 @@
 /**
- * Stream.io Video Token Generator
- * 
- * This module generates authentication tokens for Stream.io video calls.
+ * Stream Video Token Generator
+ *
+ * This module generates authentication tokens for Stream video calls.
  * Uses the official @stream-io/node-sdk to generate user tokens and call tokens via JWT.
- * 
+ *
  * Requires STREAMIO_API_KEY and STREAMIO_API_SECRET environment variables.
- * 
+ *
  * @see https://getstream.io/video/docs/api/authentication/#user-tokens
  * @see https://getstream.io/video/docs/api/authentication/#call-tokens
  */
@@ -39,19 +39,15 @@ export interface StreamTokenResponse {
 }
 
 /**
- * Generate a Stream.io user token for a given user
- * 
- * Stream uses JWT (JSON Web Tokens) to authenticate users. Tokens need to be 
- * generated server-side. If no expiration is provided, the token is valid for 
- * 1 hour by default (as per Stream.io API defaults).
- * 
- * User tokens enable users to log in and are managed separately from call-specific
- * permissions via a role-based permissions system.
- * 
+ * Generate a Stream user token for a given user
+ *
+ * User tokens authenticate a user for the video service. They are valid for
+ * 1 hour by default (as per Stream API defaults).
+ *
  * @param config - Token configuration including API credentials and user ID
  * @returns Promise resolving to token response with token string and metadata
- * @throws Error if API credentials are missing or token generation fails
- * 
+ * @throws Error if API credentials or user ID are missing, or if token generation fails
+ *
  * @see https://getstream.io/video/docs/api/authentication/#user-tokens
  */
 export async function generateUserToken(
@@ -60,7 +56,7 @@ export async function generateUserToken(
   const { apiKey, apiSecret, userId, expirationSeconds } = config;
 
   if (!apiKey || !apiSecret) {
-    throw new Error('Stream.io API key and secret are required');
+    throw new Error('Stream API key and secret are required');
   }
 
   if (!userId) {
@@ -73,9 +69,9 @@ export async function generateUserToken(
 
     // Generate user token with optional expiration
     // validity_in_seconds is optional - if not provided, token is valid for 1 hour by default
-    const token = client.generateUserToken({ 
+    const token = client.generateUserToken({
       user_id: userId,
-      validity_in_seconds: expirationSeconds
+      validity_in_seconds: expirationSeconds,
     });
 
     const response: StreamTokenResponse = {
@@ -93,37 +89,39 @@ export async function generateUserToken(
 
     return response;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Failed to generate Stream.io user token: ${errorMessage}`);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Failed to generate Stream user token: ${errorMessage}`);
   }
 }
 
 /**
- * Generate a Stream.io call token for a user with access to specific calls
- * 
+ * Generate a Stream call token for a user with access to specific calls
+ *
  * Call tokens contain a list of call IDs. When a user utilizes a call token, they
  * will automatically be assigned the membership role for all the calls specified
  * in the token's claims. The token may optionally include alternative roles such
  * as admin or moderator.
- * 
+ *
  * Note: Call tokens are designed to grant additional access, not restrict it.
  * Most call types let regular users join calls. If all users can access any call,
  * call tokens won't change this. Remove call access from the user role and grant
  * it to specific members instead.
- * 
+ *
  * @param config - Token configuration including API credentials, user ID, call IDs, and optional role
  * @returns Promise resolving to token response with token string and metadata
  * @throws Error if API credentials are missing or token generation fails
- * 
+ *
  * @see https://getstream.io/video/docs/api/authentication/#call-tokens
  */
 export async function generateCallToken(
   config: StreamCallTokenConfig
 ): Promise<StreamTokenResponse> {
-  const { apiKey, apiSecret, userId, callIds, role, expirationSeconds } = config;
+  const { apiKey, apiSecret, userId, callIds, role, expirationSeconds } =
+    config;
 
   if (!apiKey || !apiSecret) {
-    throw new Error('Stream.io API key and secret are required');
+    throw new Error('Stream API key and secret are required');
   }
 
   if (!userId) {
@@ -131,7 +129,9 @@ export async function generateCallToken(
   }
 
   if (!callIds || callIds.length === 0) {
-    throw new Error('At least one call ID is required to generate a call token');
+    throw new Error(
+      'At least one call ID is required to generate a call token'
+    );
   }
 
   try {
@@ -180,17 +180,18 @@ export async function generateCallToken(
 
     return response;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Failed to generate Stream.io call token: ${errorMessage}`);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Failed to generate Stream call token: ${errorMessage}`);
   }
 }
 
 /**
- * Generate a Stream.io token (user or call token based on configuration)
- * 
+ * Generate a Stream token (user or call token based on configuration)
+ *
  * This is a convenience function that routes to the appropriate token generation
  * method based on whether call IDs are provided.
- * 
+ *
  * @deprecated Use generateUserToken() or generateCallToken() directly for better type safety
  */
 export async function generateStreamToken(
@@ -201,12 +202,14 @@ export async function generateStreamToken(
 }
 
 /**
- * Validate Stream.io environment configuration
- * 
+ * Validate Stream environment configuration
+ *
  * @param env - Environment variables object (from Directus context or process.env)
  * @returns Object with validation status and any error messages
  */
-export function validateStreamConfig(env: Record<string, unknown> = process.env): { valid: boolean; errors: string[] } {
+export function validateStreamConfig(
+  env: Record<string, unknown> = process.env
+): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   if (!env.STREAMIO_API_KEY) {

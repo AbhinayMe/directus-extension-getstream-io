@@ -7,14 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Package name changed from `directus-extension-stream-token` to `directus-extension-getstream-io`
+- Repository name changed from `directus-stream-io-token` to `directus-extension-getstream-io`
+- Repository URL: https://github.com/AbhinayMe/directus-extension-getstream-io
+
 ## [1.0.0] - 2025-10-29
 
 ### Added
 
-- Initial release of Stream.io Token Extension for Directus
-- User token generation endpoint (`POST /streamio-token/user`)
-- Call token generation endpoint with role-based access (`POST /streamio-token/call`)
-- Health check endpoint for configuration validation (`GET /streamio-token/health`)
+- Initial release of GetStream Extension for Directus (formerly Stream Token Extension)
+- Generate user authentication tokens for Stream video
+- Call token generation endpoint with role-based access (`POST /getstream-io/callTokenToken`)
+- Health check endpoint for configuration validation (`GET /getstream-io/health`)
 - Full TypeScript support with strict typing
 - Integration with `@directus/errors` for consistent error handling
 - Integration with `context.env` and `context.logger` for Directus-native patterns
@@ -31,9 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Requirements
 
-- Directus >= 10.10.0
-- Node.js >= 18.0.0
-- Stream.io account with API credentials
+- Directus 10.10.0 or higher
+- Node.js 22 or higher
+- Stream account with API credentials
 
-[Unreleased]: https://github.com/AbhinayMe/directus-stream-io-token/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/AbhinayMe/directus-stream-io-token/releases/tag/v1.0.0
+[Unreleased]: https://github.com/AbhinayMe/directus-extension-getstream-io/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/AbhinayMe/directus-extension-getstream-io/releases/tag/v1.0.0

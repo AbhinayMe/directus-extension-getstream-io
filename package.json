@@ -1,73 +1,76 @@
 {
-	"name": "directus-extension-stream-token",
-	"description": "Generate Stream.io video authentication tokens for video calls. Provides secure JWT token generation with user and call-specific access control.",
-	"icon": "videocam",
-	"version": "1.0.0",
-	"license": "MIT",
-	"keywords": [
-		"directus",
-		"directus-extension",
-		"directus-extension-endpoint",
-		"stream-io",
-		"stream",
-		"video",
-		"video-call",
-		"video-token",
-		"authentication",
-		"token",
-		"jwt",
-		"endpoint"
-	],
-	"type": "module",
-	"files": [
-		"dist"
-	],
-	"main": "dist/index.js",
-	"directus:extension": {
-		"type": "endpoint",
-		"path": "dist/index.js",
-		"source": "src/index.ts",
-		"host": "^10.10.0"
-	},
-	"scripts": {
-		"build": "directus-extension build",
-		"dev": "directus-extension build -w --no-minify",
-		"link": "directus-extension link",
-		"validate": "directus-extension validate",
-		"test": "node --experimental-vm-modules $(yarn bin jest)",
-		"lint": "eslint src --ext .ts",
-		"prepublishOnly": "yarn build && yarn test && yarn validate"
-	},
-	"packageManager": "yarn@1.22.22",
-	"dependencies": {
-		"@directus/errors": "^2.0.4",
-		"@stream-io/node-sdk": "0.7.15"
-	},
-	"devDependencies": {
-		"@directus/extensions-sdk": "16.0.2",
-		"@types/jest": "^29.5.12",
-		"@types/node": "^24.9.1",
-		"@typescript-eslint/eslint-plugin": "^7.18.0",
-		"@typescript-eslint/parser": "^7.18.0",
-		"eslint": "^8.57.0",
-		"jest": "^29.7.0",
-		"ts-jest": "^29.2.5",
-		"typescript": "^5.9.3"
-	},
-	"author": {
-		"name": "Abhinay Me",
-		"email": "i@abhinay.me",
-		"url": "https://github.com/AbhinayMe"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/AbhinayMe/directus-stream-io-token.git"
-	},
-	"bugs": {
-		"url": "https://github.com/AbhinayMe/directus-stream-io-token/issues"
-	},
-	"homepage": "https://github.com/AbhinayMe/directus-stream-io-token#readme",
-	"engines": {
-		"node": ">=22.0.0"
-	}
+  "name": "directus-extension-getstream-io",
+  "description": "Generate Stream video authentication tokens for video calls. Provides secure JWT token generation with user and call-specific access control.",
+  "icon": "videocam",
+  "version": "1.0.0",
+  "license": "MIT",
+  "keywords": [
+    "directus",
+    "directus-extension",
+    "directus-extension-endpoint",
+    "stream-io",
+    "stream",
+    "video",
+    "video-call",
+    "video-token",
+    "authentication",
+    "token",
+    "jwt",
+    "endpoint"
+  ],
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "directus:extension": {
+    "type": "endpoint",
+    "path": "dist/index.js",
+    "source": "src/index.ts",
+    "host": "^10.10.0"
+  },
+  "scripts": {
+    "build": "directus-extension build",
+    "dev": "directus-extension build -w --no-minify",
+    "link": "directus-extension link",
+    "validate": "directus-extension validate",
+    "test": "node --experimental-vm-modules $(yarn bin jest)",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
+    "prepublishOnly": "yarn build && yarn test && yarn validate"
+  },
+  "packageManager": "yarn@1.22.22",
+  "dependencies": {
+    "@directus/errors": "^2.0.4",
+    "@stream-io/node-sdk": "0.7.15"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "16.0.2",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^24.9.1",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.9.3"
+  },
+  "author": {
+    "name": "Abhinay Me",
+    "email": "i@abhinay.me",
+    "url": "https://github.com/AbhinayMe"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AbhinayMe/directus-extension-getstream-io.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AbhinayMe/directus-extension-getstream-io/issues"
+  },
+  "homepage": "https://github.com/AbhinayMe/directus-extension-getstream-io#readme",
+  "engines": {
+    "node": ">=22.0.0"
+  }
 }

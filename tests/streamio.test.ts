@@ -1,6 +1,11 @@
-import { generateUserToken, generateCallToken, generateStreamToken, validateStreamConfig } from '../src/streamio';
+import {
+  generateUserToken,
+  generateCallToken,
+  generateStreamToken,
+  validateStreamConfig,
+} from '../src/streamio';
 
-describe('Stream.io Token Generation', () => {
+describe('Stream Token Generation', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -30,7 +35,9 @@ describe('Stream.io Token Generation', () => {
       const result = validateStreamConfig();
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('STREAMIO_API_KEY environment variable is not set');
+      expect(result.errors).toContain(
+        'STREAMIO_API_KEY environment variable is not set'
+      );
     });
 
     it('should return invalid when API secret is missing', () => {
@@ -40,7 +47,9 @@ describe('Stream.io Token Generation', () => {
       const result = validateStreamConfig();
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('STREAMIO_API_SECRET environment variable is not set');
+      expect(result.errors).toContain(
+        'STREAMIO_API_SECRET environment variable is not set'
+      );
     });
 
     it('should return invalid when both credentials are missing', () => {
@@ -62,17 +71,17 @@ describe('Stream.io Token Generation', () => {
           apiSecret: 'secret',
           userId: 'user-123',
         })
-      ).rejects.toThrow('Stream.io API key and secret are required');
+      ).rejects.toThrow('Stream API key and secret are required');
     });
 
-    it('should throw error when API secret is missing', async () => {
+    it('should throw error if secret is missing', async () => {
       await expect(
         generateUserToken({
           apiKey: 'key',
           apiSecret: '',
           userId: 'user-123',
         })
-      ).rejects.toThrow('Stream.io API key and secret are required');
+      ).rejects.toThrow('Stream API key and secret are required');
     });
 
     it('should throw error when user ID is missing', async () => {
@@ -114,12 +123,12 @@ describe('Stream.io Token Generation', () => {
 
       expect(result).toHaveProperty('expiresAt');
       expect(result.expiresAt).toBeInstanceOf(Date);
-      
+
       // Check that expiration is roughly 1 hour from now
       const now = Date.now();
       const expirationTime = result.expiresAt!.getTime();
       const timeDiff = expirationTime - now;
-      
+
       // Allow 5 second margin for test execution time
       expect(timeDiff).toBeGreaterThan(3595000); // 3595 seconds
       expect(timeDiff).toBeLessThan(3605000); // 3605 seconds
@@ -135,7 +144,7 @@ describe('Stream.io Token Generation', () => {
           userId: 'user-123',
           callIds: ['default:call1'],
         })
-      ).rejects.toThrow('Stream.io API key and secret are required');
+      ).rejects.toThrow('Stream API key and secret are required');
     });
 
     it('should throw error when API secret is missing', async () => {
@@ -146,7 +155,7 @@ describe('Stream.io Token Generation', () => {
           userId: 'user-123',
           callIds: ['default:call1'],
         })
-      ).rejects.toThrow('Stream.io API key and secret are required');
+      ).rejects.toThrow('Stream API key and secret are required');
     });
 
     it('should throw error when user ID is missing', async () => {
@@ -168,7 +177,9 @@ describe('Stream.io Token Generation', () => {
           userId: 'user-123',
           callIds: [],
         })
-      ).rejects.toThrow('At least one call ID is required to generate a call token');
+      ).rejects.toThrow(
+        'At least one call ID is required to generate a call token'
+      );
     });
 
     it('should return a call token response with required fields', async () => {
@@ -218,11 +229,11 @@ describe('Stream.io Token Generation', () => {
 
       expect(result).toHaveProperty('expiresAt');
       expect(result.expiresAt).toBeInstanceOf(Date);
-      
+
       const now = Date.now();
       const expirationTime = result.expiresAt!.getTime();
       const timeDiff = expirationTime - now;
-      
+
       expect(timeDiff).toBeGreaterThan(3595000);
       expect(timeDiff).toBeLessThan(3605000);
     });
