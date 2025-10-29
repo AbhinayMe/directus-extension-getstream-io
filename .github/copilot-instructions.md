@@ -403,173 +403,132 @@ Before committing code:
 - [ ] Run `yarn lint` - no linting errors
 - [ ] Run `yarn format` - code properly formatted
 - [ ] Run `yarn validate` - extension structure valid
-- [ ] Update README.md if API changed
+- [ ] Update `docs/API.md` if API changed
+- [ ] Update `docs/CHANGELOG.md` with changes (in `[Unreleased]` section)
 - [ ] Check `.env.example` is up to date
 - [ ] Verify no secrets in code or commits
-- [ ] Update version in package.json if needed
 
-Before publishing to marketplace:
+Before publishing:
 
 - [ ] All maintenance checks above passed
-- [ ] CHANGELOG.md updated with version changes
-- [ ] Git tag created: `git tag v1.x.x`
-- [ ] Tag pushed: `git push origin --tags`
-- [ ] README.md includes all necessary documentation
-- [ ] package.json includes `directus-extension` keyword
-- [ ] Test installation locally: `yarn link`
-- [ ] NPM publish succeeds: `npm publish --access public`
-- [ ] Wait 2-4 hours for marketplace indexing
-- [ ] Verify listing at <https://directus.io/extensions>
+- [ ] `docs/CHANGELOG.md` updated with changes in `[Unreleased]` section
+- [ ] All documentation in `docs/` folder is up to date
+- [ ] Push to `publish` branch or trigger manual workflow
+- [ ] CI/CD workflow will automatically:
+  - Generate version (`YYYY.M.D-NNN`)
+  - Build, test, and lint
+  - Publish to npm
+  - Create git tag
+  - Create GitHub Release with changelog
 
 ## Release Package Management
 
 ### Versioning Strategy
 
-Follow [Semantic Versioning](https://semver.org/) (SemVer): `MAJOR.MINOR.PATCH`
+This project uses **automated date-based versioning** with sequential daily counters.
 
-- **PATCH** (1.0.x): Bug fixes, documentation updates, internal refactoring
-- **MINOR** (1.x.0): New features, backward-compatible functionality
-- **MAJOR** (x.0.0): Breaking changes, major rewrites
+**Format:** `YYYY.M.D-NNN`
 
-### Release Workflow
+**Examples:**
+- `2025.10.30-001` — First release on October 30, 2025
+- `2025.10.30-002` — Second release on October 30, 2025
+- `2025.12.1-001` — First release on December 1, 2025
 
-#### 1. Pre-Release Preparation
+**Benefits:**
+- ✅ No manual version bumps needed
+- ✅ Every publish gets a unique version
+- ✅ Version indicates release date
+- ✅ Sequential counter shows release order per day
+- ✅ No version conflicts
+
+### Automated Release Workflow
+
+The project uses GitHub Actions for fully automated publishing:
+
+**Workflow:** `.github/workflows/publish.yml`
+
+**Triggers:**
+1. **Automatic:** Push to `publish` branch
+2. **Manual:** GitHub Actions UI → Run workflow button
+
+**What the workflow does:**
+1. Generates date-based version with sequential counter
+2. Updates `package.json` automatically
+3. Runs build, tests, and linting
+4. Publishes to npm with Granular Access Token
+5. Creates git tag (e.g., `v2025.10.30-001`)
+6. Creates GitHub Release with:
+   - Package info and install command
+   - Changelog from `docs/CHANGELOG.md` (`[Unreleased]` section)
+   - Auto-generated commit notes
+
+### Publishing Process
+
+#### Method 1: Push to `publish` branch (Recommended)
 
 ```bash
-# Ensure working directory is clean
-git status
-
-# Pull latest changes
+# Ensure changes are committed and pushed to main
+git checkout main
 git pull origin main
 
-# Run full test suite
-yarn build && yarn test && yarn lint && yarn format:check && yarn validate
+# Update CHANGELOG.md [Unreleased] section with your changes
 
-# Verify all tests pass
+# Push to publish branch to trigger release
+git checkout publish
+git merge main
+git push origin publish
 ```
 
-#### 2. Update Version and Changelog
+The CI/CD workflow automatically handles versioning and publishing.
 
-```bash
-# Update version (choose one)
-npm version patch   # 1.0.0 → 1.0.1 (bug fixes)
-npm version minor   # 1.0.0 → 1.1.0 (new features)
-npm version major   # 1.0.0 → 2.0.0 (breaking changes)
+#### Method 2: Manual Trigger via GitHub Actions UI
 
-# This automatically:
-# - Updates package.json version
-# - Creates git commit with message "1.x.x"
-# - Creates git tag "v1.x.x"
-```
+1. Go to repository → **Actions** tab
+2. Select **"Publish to npm on publish branch"** workflow
+3. Click **"Run workflow"** button
+4. Select branch (usually `main` or `publish`)
+5. Optionally enter reason (e.g., "Hotfix for memory leak")
+6. Click **"Run workflow"**
 
-**Manually update CHANGELOG.md:**
+**Note:** Ensure `docs/CHANGELOG.md` is updated before triggering.
 
-```markdown
-## [1.1.0] - 2025-10-30
+### Required GitHub Secrets
 
-### Added
-- New feature description
-- Another feature
+**`NPM_TOKEN`** — npm access token for publishing
 
-### Changed
-- Modified behavior description
+**Recommended:** Granular Access Token
+- More secure with scoped permissions
+- Create at [npmjs.com](https://www.npmjs.com/) → Access Tokens → Granular Access Token
+- Permissions: **Read and write** for packages
+- Select package: `directus-extension-getstream-io`
 
-### Fixed
-- Bug fix description
+**Alternative:** Classic Automation token (legacy, broader access)
 
-### Security
-- Security update description
-```
+Add to GitHub: Repository → Settings → Secrets and variables → Actions → New repository secret
 
-#### 3. Commit and Tag
+### Version History & Releases
 
-```bash
-# If you updated CHANGELOG manually (after npm version)
-git add CHANGELOG.md
-git commit --amend --no-edit
+- **GitHub Releases:** Auto-created with changelog and install instructions
+- **Git Tags:** Created automatically (e.g., `v2025.10.30-001`)
+- **npm Package:** Published automatically at each release
+- **Changelog:** Maintained in `docs/CHANGELOG.md`
 
-# Push commits and tags
-git push origin main
-git push origin --tags
-```
+### Updating Documentation
 
-#### 4. Create GitHub Release
+All documentation is in the `docs/` folder:
 
-**Option A: GitHub CLI (Recommended)**
+- `docs/API.md` — Endpoint documentation with examples
+- `docs/PUBLISHING.md` — CI/CD and publishing guide
+- `docs/TROUBLESHOOTING.md` — Common issues and solutions
+- `docs/CHANGELOG.md` — Version history and release notes
 
-```bash
-# Install GitHub CLI if needed
-brew install gh
+**Before each release:**
+1. Update `docs/CHANGELOG.md` in the `[Unreleased]` section
+2. Document new features under `### Added`
+3. Document changes under `### Changed`
+4. Document fixes under `### Fixed`
 
-# Authenticate (first time only)
-gh auth login
-
-# Create release with auto-generated notes
-gh release create v1.1.0 \
-  --title "v1.1.0 - Feature Release" \
-  --notes "Release notes here" \
-  --generate-notes
-
-# Or with changelog file
-gh release create v1.1.0 \
-  --title "v1.1.0" \
-  --notes-file CHANGELOG.md
-```
-
-**Option B: GitHub Web UI**
-
-1. Go to <https://github.com/AbhinayMe/directus-extension-getstream-io/releases>
-2. Click "Draft a new release"
-3. Select tag: `v1.1.0`
-4. Release title: `v1.1.0 - Feature Release`
-5. Description: Copy from CHANGELOG.md or use auto-generate
-6. Check "Set as the latest release"
-7. Click "Publish release"
-
-#### 5. Publish to NPM
-
-```bash
-# Ensure you're logged in to NPM
-npm whoami
-
-# If not logged in
-npm login
-
-# Build the extension
-yarn build
-
-# Publish to NPM (public access required for scoped packages)
-npm publish --access public
-
-# Verify publication
-npm view directus-extension-getstream-io
-```
-
-#### 6. Verify Release
-
-```bash
-# Check NPM package
-npm view directus-extension-getstream-io version
-npm view directus-extension-getstream-io
-
-# Check GitHub release
-gh release view v1.1.0
-
-# Test installation
-cd /tmp
-mkdir test-install
-cd test-install
-npm init -y
-npm install directus-extension-getstream-io
-```
-
-#### 7. Marketplace Verification
-
-- Wait 2-4 hours for Directus marketplace indexing
-- Visit <https://directus.io/extensions>
-- Search for "getstream" or "directus-extension-getstream-io"
-- Verify version number matches
-- Check extension details are correct
+The workflow automatically extracts `[Unreleased]` section and includes it in GitHub Releases.
 
 ### NPM Package Management
 
