@@ -88,70 +88,6 @@ jobs:
           ACTUAL_VERSION=$(jq -r '.version' package.json)
           echo "Verified package.json version: $ACTUAL_VERSION"
 
-      - name: Update CHANGELOG.md
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          DATE=$(date -u +"%Y-%m-%d")
-          CHANGELOG_FILE="docs/CHANGELOG.md"
-          
-          if [ -f "$CHANGELOG_FILE" ]; then
-            echo "Updating CHANGELOG.md with version ${VERSION}..."
-            
-            # Check if there's content in the Unreleased section
-            UNRELEASED_CONTENT=$(awk '/## \[Unreleased\]/,/## \[/' "$CHANGELOG_FILE" | sed '1d;$d' | grep -v '^[[:space:]]*$' | grep -E '^###')
-            
-            if [ -n "$UNRELEASED_CONTENT" ]; then
-              # Create a temporary file with the updated changelog
-              awk -v version="$VERSION" -v date="$DATE" '
-                /## \[Unreleased\]/ {
-                  print $0
-                  print ""
-                  print "### Added"
-                  print ""
-                  print "### Changed"
-                  print ""
-                  print "### Fixed"
-                  print ""
-                  print "### Improved"
-                  print ""
-                  print "## [" version "] - " date
-                  in_unreleased = 1
-                  next
-                }
-                /## \[/ && in_unreleased {
-                  in_unreleased = 0
-                }
-                !in_unreleased || !/^### (Added|Changed|Fixed|Improved)[[:space:]]*$/ {
-                  print $0
-                }
-              ' "$CHANGELOG_FILE" > "${CHANGELOG_FILE}.tmp"
-              
-              # Update the comparison links at the bottom
-              sed -i "s|\[Unreleased\]: https://github.com/AbhinayMe/directus-extension-getstream-io/compare/v.*\.\.\.HEAD|[Unreleased]: https://github.com/AbhinayMe/directus-extension-getstream-io/compare/v${VERSION}...HEAD|" "${CHANGELOG_FILE}.tmp"
-              
-              # Find the previous version for comparison link
-              PREV_VERSION=$(grep -E '^\[.*\]:.*compare' "$CHANGELOG_FILE" | head -1 | sed -E 's/.*compare\/v([^.]+\.[^.]+\.[^-]+-[0-9]+)\.\.\..*/\1/')
-              if [ -n "$PREV_VERSION" ]; then
-                # Insert new version comparison link after [Unreleased]
-                sed -i "/\[Unreleased\]:/a [${VERSION}]: https://github.com/AbhinayMe/directus-extension-getstream-io/compare/v${PREV_VERSION}...v${VERSION}" "${CHANGELOG_FILE}.tmp"
-              fi
-              
-              mv "${CHANGELOG_FILE}.tmp" "$CHANGELOG_FILE"
-              echo "✅ CHANGELOG.md updated with version ${VERSION}"
-              
-              # Commit the updated changelog
-              git config user.name "github-actions[bot]"
-              git config user.email "github-actions[bot]@users.noreply.github.com"
-              git add "$CHANGELOG_FILE" package.json
-              git commit -m "chore: update changelog for v${VERSION} [skip ci]"
-              git push origin HEAD:main
-            else
-              echo "ℹ️ No unreleased changes found in CHANGELOG.md"
-            fi
-          else
-            echo "⚠️ CHANGELOG.md not found at $CHANGELOG_FILE"
-          fi
-
       - name: Build
         run: yarn build
 
@@ -190,24 +126,6 @@ jobs:
           git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
           git push origin "v${{ steps.version.outputs.version }}"
 
-      - name: Extract latest changelog
-        id: changelog
-        run: |
-          # Extract the Unreleased section from CHANGELOG.md
-          if [ -f "docs/CHANGELOG.md" ]; then
-            # Get content between ## [Unreleased] and the next ## heading
-            CHANGELOG=$(awk '/## \[Unreleased\]/,/## \[/' docs/CHANGELOG.md | sed '1d;$d' | sed '/^$/d')
-            if [ -z "$CHANGELOG" ]; then
-              CHANGELOG="No changelog entries found."
-            fi
-          else
-            CHANGELOG="No changelog available."
-          fi
-          # Save to output using multiline string
-          echo "content<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
@@ -227,9 +145,5 @@ jobs:
             ```
             
             ${{ github.event_name == 'workflow_dispatch' && format('**Trigger reason:** {0}', github.event.inputs.reason) || '' }}
-            
-            ## 📝 Changelog
-            
-            ${{ steps.changelog.outputs.content }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
