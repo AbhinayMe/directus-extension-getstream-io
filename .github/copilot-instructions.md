@@ -5,6 +5,7 @@
 This is a **Directus custom endpoint extension** that generates Stream.io video authentication tokens (both user tokens and call tokens) using the official `@stream-io/node-sdk`.
 
 ### Technology Stack
+
 - **Runtime**: Node.js 18+
 - **Language**: TypeScript (strict mode)
 - **Framework**: Directus Extensions SDK v16.0.2
@@ -16,6 +17,7 @@ This is a **Directus custom endpoint extension** that generates Stream.io video 
 ## Code Style & Conventions
 
 ### TypeScript
+
 - Use strict TypeScript with explicit types
 - Prefer interfaces over types for object shapes
 - Always export interfaces used in public APIs
@@ -24,6 +26,7 @@ This is a **Directus custom endpoint extension** that generates Stream.io video 
 - Use async/await over promises `.then()`
 
 ### Naming Conventions
+
 - **Files**: kebab-case (e.g., `streamio.ts`, `stream-token.ts`)
 - **Functions**: camelCase (e.g., `generateUserToken`, `validateStreamConfig`)
 - **Interfaces**: PascalCase with descriptive names (e.g., `StreamTokenConfig`, `StreamCallTokenConfig`)
@@ -31,6 +34,7 @@ This is a **Directus custom endpoint extension** that generates Stream.io video 
 - **Types**: PascalCase (e.g., `StreamTokenResponse`)
 
 ### Code Organization
+
 ```
 src/
   ├── index.ts          # Directus endpoint definitions (Express-like routes)
@@ -42,44 +46,72 @@ tests/
 ## Directus Extension Guidelines
 
 ### Endpoint Definition Pattern
+
 ```typescript
 import { defineEndpoint } from '@directus/extensions-sdk';
+import { createError } from '@directus/errors';
 
-export default defineEndpoint((router) => {
+export default defineEndpoint((router, context) => {
+  const { env, logger } = context;
+
   router.get('/path', (req, res) => {
-    // Handler logic
+    // Handler logic with logger.info/error
   });
-  
-  router.post('/path', async (req, res) => {
-    // Async handler with try-catch
+
+  router.post('/path', async (req, res, next) => {
+    try {
+      // Async handler with error handling
+    } catch (error) {
+      logger.error({ error }, 'Error message');
+      next(error);
+    }
   });
 });
 ```
 
 ### Response Patterns
+
 - **Success**: `res.json({ ...data })`
-- **Client Error**: `res.status(400).json({ error: 'Bad Request', message: '...' })`
-- **Server Error**: `res.status(500).json({ error: 'Internal Server Error', message: '...' })`
-- **Configuration Error**: `res.status(500).json({ error: 'Configuration Error', details: [...] })`
+- **Client Error**: Throw Directus error: `throw new MissingFieldError()`
+- **Server Error**: Throw Directus error: `throw new InternalServerError()`
+- **Configuration Error**: Log and throw: `logger.error({...}); throw new ConfigurationError({...})`
 
 ### Environment Variables
-- Always check configuration with `validateStreamConfig()` before token generation
-- Use `process.env.STREAMIO_API_KEY` and `process.env.STREAMIO_API_SECRET`
+
+- Use `context.env` from Directus instead of `process.env`
+- Always check configuration with `validateStreamConfig(env)` before token generation
+- Use `env.STREAMIO_API_KEY` and `env.STREAMIO_API_SECRET`
 - Never log or expose secrets in responses
+
+### Logging
+
+- Use `context.logger` (Pino) instead of `console.log/error`
+- Log with structured data: `logger.info({ userId, type: 'user' }, 'Message')`
+- Log errors: `logger.error({ error, context }, 'Error message')`
+- Never log tokens or secrets
+
+### Error Handling
+
+- Use `@directus/errors` package for consistent error responses
+- Create custom errors with `createError(code, message, status)`
+- Pass errors to Express middleware with `next(error)`
+- Directus automatically formats error responses
 
 ## Stream.io API Integration
 
 ### Token Types
 
 **User Tokens** - For user authentication:
+
 ```typescript
 client.generateUserToken({
   user_id: string,
-  validity_in_seconds?: number  // Optional, default 1 hour
+  validity_in_seconds: number, // Optional, default 1 hour
 });
 ```
 
 **Call Tokens** - For call-specific access:
+
 ```typescript
 client.generateCallToken({
   user_id: string,
@@ -90,12 +122,14 @@ client.generateCallToken({
 ```
 
 ### Important Notes
+
 - Default token validity: 1 hour (Stream.io API default)
 - Call tokens grant **additional** access, not restrictions
 - Call IDs format: `{type}:{id}` (e.g., `default:call1`, `livestream:meeting123`)
 - Valid roles: `admin`, `moderator`, `user` (default)
 
 ### Official Documentation
+
 - User Tokens: https://getstream.io/video/docs/api/authentication/#user-tokens
 - Call Tokens: https://getstream.io/video/docs/api/authentication/#call-tokens
 - Node SDK: https://github.com/GetStream/stream-video-js/tree/main/packages/node-sdk
@@ -103,12 +137,14 @@ client.generateCallToken({
 ## Testing Guidelines
 
 ### Test Structure
+
 - Use `describe` blocks to group related tests
 - Test both success and error cases
 - Mock environment variables with `beforeEach` and `afterAll`
 - Use descriptive test names: `should [expected behavior] when [condition]`
 
 ### Running Tests
+
 ```bash
 yarn test           # Run all tests
 yarn test --watch   # Watch mode
@@ -116,6 +152,7 @@ yarn test --coverage # With coverage
 ```
 
 ### Key Test Patterns
+
 ```typescript
 describe('functionName', () => {
   beforeEach(() => {
@@ -136,6 +173,7 @@ describe('functionName', () => {
 ## Build & Development
 
 ### Commands
+
 ```bash
 yarn install        # Install dependencies
 yarn build          # Build extension (production)
@@ -147,6 +185,7 @@ yarn link           # Link to Directus instance
 ```
 
 ### Build Output
+
 - Extension bundles to `dist/index.js`
 - Uses Rollup (via Directus CLI)
 - ESM format required
@@ -154,24 +193,28 @@ yarn link           # Link to Directus instance
 ## Security Best Practices
 
 ### Environment Variables
+
 - Never commit `.env` files
 - Always use `.env.example` for templates
 - Validate all credentials before use
 - Use non-null assertion (`!`) only after validation
 
 ### Input Validation
+
 - Always validate required fields in request body
 - Check array lengths for `callIds`
 - Sanitize user inputs
 - Return appropriate HTTP status codes
 
 ### Error Handling
+
 - Catch all errors in async handlers
 - Log errors with `console.error` (goes to Directus logs)
 - Never expose internal error details to clients
 - Use generic error messages for security
 
 ### Token Security
+
 - Tokens should only be generated server-side
 - Use HTTPS in production
 - Set appropriate token expiration times
@@ -182,16 +225,19 @@ yarn link           # Link to Directus instance
 ### Current Endpoints
 
 1. **GET /streamio-token/health**
+
    - Purpose: Health check and configuration validation
    - Auth: None required
    - Response: Status, configuration state, available endpoints
 
 2. **POST /streamio-token/user**
+
    - Purpose: Generate user authentication token
    - Body: `{ userId: string, expirationSeconds?: number }`
    - Response: Token with metadata
 
 3. **POST /streamio-token/call**
+
    - Purpose: Generate call-specific token
    - Body: `{ userId: string, callIds: string[], role?: string, expirationSeconds?: number }`
    - Response: Token with call metadata
@@ -201,6 +247,7 @@ yarn link           # Link to Directus instance
    - Use `/user` instead
 
 ### Adding New Endpoints
+
 - Follow RESTful conventions
 - Use proper HTTP methods (GET for reads, POST for creates)
 - Include JSDoc comments with request/response examples
@@ -211,6 +258,7 @@ yarn link           # Link to Directus instance
 ## Common Tasks
 
 ### Adding a New Token Type
+
 1. Create new config interface in `streamio.ts`
 2. Implement generation function with full error handling
 3. Add JSDoc with `@see` link to Stream.io docs
@@ -220,6 +268,7 @@ yarn link           # Link to Directus instance
 7. Run `yarn build && yarn test && yarn validate`
 
 ### Updating Dependencies
+
 ```bash
 yarn add <package>@<version>      # Add production dependency
 yarn add -D <package>@<version>   # Add dev dependency
@@ -227,6 +276,7 @@ yarn upgrade <package>@<version>  # Upgrade existing package
 ```
 
 ### Debugging
+
 - Check Directus logs for server-side errors
 - Use `/health` endpoint to verify configuration
 - Test with curl before client integration
@@ -249,62 +299,70 @@ yarn upgrade <package>@<version>  # Upgrade existing package
 
 - `@stream-io/node-sdk`: ^0.7.15 - Official Stream.io Video SDK
 - `@directus/extensions-sdk`: 16.0.2 - Directus extension framework
+- `@directus/errors`: ^2.0.4 - Directus error handling
 - `typescript`: ^5.9.3 - TypeScript compiler
 - `jest`: ^29.7.0 - Testing framework
 - `eslint`: ^8.57.0 - Linting
 
 ## Error Handling Patterns
 
+### Custom Directus Errors
+
+```typescript
+import { createError } from '@directus/errors';
+
+const MissingUserIdError = createError(
+  'MISSING_USER_ID',
+  'userId is required in request body',
+  400
+);
+```
+
 ### Validation Errors (400)
+
 ```typescript
 if (!userId) {
-  return res.status(400).json({
-    error: 'Bad Request',
-    message: 'userId is required in request body'
-  });
+  throw new MissingUserIdError();
 }
 ```
 
 ### Configuration Errors (500)
+
 ```typescript
-const config = validateStreamConfig();
+const config = validateStreamConfig(env);
 if (!config.valid) {
-  return res.status(500).json({
-    error: 'Configuration Error',
-    message: 'Stream.io is not properly configured',
-    details: config.errors
-  });
+  logger.error({ details: config.errors }, 'Configuration invalid');
+  throw new ConfigurationError({ details: config.errors });
 }
 ```
 
 ### Runtime Errors (500)
+
 ```typescript
 try {
   const token = await generateUserToken(config);
+  logger.info({ userId, type: 'user' }, 'Token generated');
   res.json(token);
 } catch (error) {
-  console.error('Error generating token:', error);
-  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: errorMessage
-  });
+  logger.error({ error, userId }, 'Token generation failed');
+  next(error);
 }
 ```
 
 ## Documentation Standards
 
 ### Function Documentation
+
 ```typescript
 /**
  * Brief description of what the function does
- * 
+ *
  * Detailed explanation of behavior, defaults, and important notes.
- * 
+ *
  * @param config - Description of parameter
  * @returns Promise resolving to description of return value
  * @throws Error if description of error conditions
- * 
+ *
  * @see https://link-to-relevant-documentation
  */
 export async function functionName(config: ConfigType): Promise<ReturnType> {
@@ -313,6 +371,7 @@ export async function functionName(config: ConfigType): Promise<ReturnType> {
 ```
 
 ### README Updates
+
 - Keep API examples current
 - Include curl examples for all endpoints
 - Document all request/response fields in tables
@@ -322,6 +381,7 @@ export async function functionName(config: ConfigType): Promise<ReturnType> {
 ## Maintenance Checklist
 
 Before committing code:
+
 - [ ] Run `yarn build` - ensure no build errors
 - [ ] Run `yarn test` - all tests pass
 - [ ] Run `yarn lint` - no linting errors

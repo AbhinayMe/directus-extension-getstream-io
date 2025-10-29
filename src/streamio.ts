@@ -203,16 +203,17 @@ export async function generateStreamToken(
 /**
  * Validate Stream.io environment configuration
  * 
+ * @param env - Environment variables object (from Directus context or process.env)
  * @returns Object with validation status and any error messages
  */
-export function validateStreamConfig(): { valid: boolean; errors: string[] } {
+export function validateStreamConfig(env: Record<string, unknown> = process.env): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
-  if (!process.env.STREAMIO_API_KEY) {
+  if (!env.STREAMIO_API_KEY) {
     errors.push('STREAMIO_API_KEY environment variable is not set');
   }
 
-  if (!process.env.STREAMIO_API_SECRET) {
+  if (!env.STREAMIO_API_SECRET) {
     errors.push('STREAMIO_API_SECRET environment variable is not set');
   }
 

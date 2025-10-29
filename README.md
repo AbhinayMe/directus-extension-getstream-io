@@ -9,7 +9,15 @@ A Directus custom endpoint extension that generates authentication tokens for St
 - 🛡️ Built-in validation and error handling
 - 🔧 Configurable token expiration
 - 📊 Health check endpoint for monitoring
-- ✅ TypeScript support with full type safety
+## Features
+
+- ✅ **User Token Generation** - JWT tokens for user authentication
+- ✅ **Call Token Generation** - JWT tokens with call-specific access and roles
+- ✅ **Configuration Validation** - Health check endpoint with environment validation
+- ✅ **TypeScript Support** - Full type safety with TypeScript
+- ✅ **Directus Integration** - Uses `context.env`, `context.logger`, and `@directus/errors`
+- ✅ **Comprehensive Testing** - 17 Jest tests covering all functionality
+- ✅ **Production Ready** - Built with official @stream-io/node-sdk
 - 🎥 Uses official Stream.io Video Node SDK (v0.7.15)
 
 ## Prerequisites
@@ -18,7 +26,44 @@ A Directus custom endpoint extension that generates authentication tokens for St
 - Node.js 18 or higher
 - Stream.io account with API credentials
 
+## Architecture
+
+This extension follows Directus best practices:
+
+- **Endpoint Definition**: Uses `defineEndpoint` from `@directus/extensions-sdk`
+- **Environment Variables**: Accesses configuration via `context.env` from Directus
+- **Logging**: Uses `context.logger` (Pino) for structured logging
+- **Error Handling**: Uses `@directus/errors` package for consistent error responses
+- **Token Generation**: Uses official `@stream-io/node-sdk` StreamClient
+
+The extension exposes three endpoints under `/streamio-token`:
+- `GET /health` - Configuration validation and status
+- `POST /user` - User token generation
+- `POST /call` - Call token generation with role-based access
+
 ## Installation
+
+### For End Users
+
+**🎉 Coming Soon: Directus Marketplace**
+
+This extension will be available on the [Directus Marketplace](https://marketplace.directus.io) for easy one-click installation.
+
+**Current Installation Methods:**
+
+### Option A: Install from NPM
+
+```bash
+# In your Directus project directory
+npm install directus-extension-stream-token
+
+# Or with yarn
+yarn add directus-extension-stream-token
+```
+
+### Option B: Build and Install Locally
+
+For developers or CapRover deployments:
 
 ### 1. Get Stream.io Credentials
 
@@ -330,13 +375,28 @@ Contributions are welcome! Please:
 4. Ensure all tests pass: `yarn test`
 5. Submit a pull request
 
+## Publishing to Marketplace
+
+Want to publish this or your own extension to the Directus Marketplace?
+
+**📖 See [PUBLISHING.md](./PUBLISHING.md)** for complete guide on:
+- Publishing to NPM
+- Submitting to Directus Marketplace
+- Version management
+- Best practices
+
+**Quick Links:**
+- [Publishing Guide](./PUBLISHING.md) - Complete step-by-step guide
+- [Publish Checklist](./PUBLISH_CHECKLIST.md) - Pre-publication checklist
+- [Changelog](./CHANGELOG.md) - Version history
+
 ## License
 
 MIT
 
 ## Resources
 
-- [Directus Extensions Documentation](https://docs.directus.io/extensions/)
+- [Directus Extensions Documentation](https://directus.io/docs/guides/extensions/overview/)
 - [Stream.io Video Documentation](https://getstream.io/video/docs/)
 - [Stream.io Node SDK](https://github.com/GetStream/stream-video-js/tree/main/packages/node-sdk)
 - [Directus Extensions SDK](https://www.npmjs.com/package/@directus/extensions-sdk)

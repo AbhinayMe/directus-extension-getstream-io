@@ -102,6 +102,7 @@ curl -X POST http://localhost:8055/streamio-token/call \
 ## Build Output
 
 After running `yarn build`, the extension is bundled to:
+
 - `dist/index.js` - Main entry point
 - `dist/index.d.ts` - TypeScript declarations
 
