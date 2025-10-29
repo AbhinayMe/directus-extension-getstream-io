@@ -12,17 +12,21 @@ and this project adheres to date-based versioning (`YYYY.M.D-NNN` format).
 
 ### Added
 
+- Manual script (`scripts/update-changelog.sh`) for semi-automated CHANGELOG versioning
+- `yarn changelog` command to update CHANGELOG with new version
+- Scripts documentation in `scripts/README.md`
+- Git pre-commit hook for CHANGELOG validation
+
 ### Changed
+
+- Publishing workflow documentation updated with script-based CHANGELOG management
+- Copilot instructions updated with CHANGELOG automation details
 
 ### Fixed
 
 ### Improved
 
-## [2025.10.29-003] - 2025-10-29
-
-
-
-
+- Easier CHANGELOG maintenance with automation script
 
 ## [2025.10.29-003] - 2025-10-29
 
@@ -108,7 +112,6 @@ and this project adheres to date-based versioning (`YYYY.M.D-NNN` format).
 - Stream account with API credentials
 
 [Unreleased]: https://github.com/AbhinayMe/directus-extension-getstream-io/compare/v2025.10.29-003...HEAD
-[2025.10.29-003]: https://github.com/AbhinayMe/directus-extension-getstream-io/compare/v2025.10.29-003...v2025.10.29-003
 [2025.10.29-003]: https://github.com/AbhinayMe/directus-extension-getstream-io/compare/v2025.10.29-002...v2025.10.29-003
 [2025.10.29-002]: https://github.com/AbhinayMe/directus-extension-getstream-io/compare/v1.0.0...v2025.10.29-002
 [1.0.0]: https://github.com/AbhinayMe/directus-extension-getstream-io/releases/tag/v1.0.0

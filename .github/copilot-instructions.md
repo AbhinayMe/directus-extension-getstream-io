@@ -8,6 +8,12 @@ This is a **published Directus custom endpoint extension** that generates Stream
 **Package**: `directus-extension-getstream-io` (published on NPM)
 **Status**: ✅ Production-ready and available on [Directus Marketplace](https://directus.io/extensions)
 
+**CI/CD**: Fully automated publishing with GitHub Actions
+- Auto-versioning with date-based format (`YYYY.M.D-NNN`)
+- Automatic npm publishing on push to `publish` branch
+- GitHub Releases with changelog integration
+- Status badges in README
+
 ### Technology Stack
 
 - **Runtime**: Node.js 22+
@@ -56,7 +62,32 @@ src/
   └── streamio.ts       # Core Stream token generation logic
 tests/
   └── streamio.test.ts  # Jest unit tests
+scripts/
+  ├── update-changelog.sh  # Automate CHANGELOG.md versioning
+  └── README.md            # Scripts documentation
+docs/
+  ├── API.md               # Complete endpoint documentation
+  ├── PUBLISHING.md        # CI/CD and publishing guide
+  ├── TROUBLESHOOTING.md   # Common issues and solutions
+  └── CHANGELOG.md         # Version history
 ```
+
+### Automation Scripts
+
+**`scripts/update-changelog.sh`** — Automates CHANGELOG.md updates
+
+Usage:
+```bash
+yarn changelog  # Run the script
+```
+
+What it does:
+- Generates next version based on date and git tags
+- Moves `[Unreleased]` content to new version section
+- Updates version comparison links
+- Resets `[Unreleased]` with empty subsections
+
+See `scripts/README.md` for detailed documentation.
 
 ## Directus Extension Guidelines
 
@@ -305,8 +336,23 @@ yarn upgrade <package>@<version>  # Upgrade existing package
   "test": "node --experimental-vm-modules $(yarn bin jest)",
   "lint": "eslint src --ext .ts",
   "format": "prettier --write \"**/*.{ts,js,json,md}\"",
-  "format:check": "prettier --check \"**/*.{ts,js,json,md}\""
+  "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
+  "changelog": "scripts/update-changelog.sh"
 }
+```
+
+### Available Commands
+
+```bash
+yarn build           # Build extension (production)
+yarn dev             # Build with watch mode
+yarn test            # Run tests
+yarn lint            # Run ESLint
+yarn format          # Format all files with Prettier
+yarn format:check    # Check formatting (CI/CD)
+yarn validate        # Validate extension structure
+yarn link            # Link to Directus instance
+yarn changelog       # Update CHANGELOG.md with new version
 ```
 
 ## Key Dependencies
@@ -440,6 +486,15 @@ This project uses **automated date-based versioning** with sequential daily coun
 - ✅ Version indicates release date
 - ✅ Sequential counter shows release order per day
 - ✅ No version conflicts
+- ✅ Leading zeros preserved in package.json and npm
+
+**Version Generation Process:**
+1. Queries npm registry for existing versions published today
+2. Checks git tags for releases created today
+3. Uses the higher count to avoid conflicts
+4. Increments counter and formats with leading zeros (`001`, `002`, etc.)
+5. Verifies the version doesn't exist on npm before publishing
+6. Uses `jq` to update package.json (not `npm version`) to preserve leading zeros
 
 ### Automated Release Workflow
 
@@ -452,8 +507,8 @@ The project uses GitHub Actions for fully automated publishing:
 2. **Manual:** GitHub Actions UI → Run workflow button
 
 **What the workflow does:**
-1. Generates date-based version with sequential counter
-2. Updates `package.json` automatically
+1. Generates date-based version with sequential counter (queries npm and git tags)
+2. Updates `package.json` automatically using `jq` to preserve leading zeros
 3. Runs build, tests, and linting
 4. Publishes to npm with Granular Access Token
 5. Creates git tag (e.g., `v2025.10.30-001`)
@@ -462,7 +517,54 @@ The project uses GitHub Actions for fully automated publishing:
    - Changelog from `docs/CHANGELOG.md` (`[Unreleased]` section)
    - Auto-generated commit notes
 
+**GitHub Actions Permissions:**
+- `contents: write` — Allows pushing tags and creating releases
+- `packages: write` — Allows publishing packages
+- `fetch-depth: 0` — Fetches all git history for version counting
+
 ### Publishing Process
+
+**Important:** Always update `docs/CHANGELOG.md` before publishing!
+
+Add your changes to the `[Unreleased]` section with appropriate subsections:
+- `### Added` — New features
+- `### Changed` — Changes to existing functionality
+- `### Fixed` — Bug fixes
+- `### Improved` — Performance or documentation improvements
+
+#### Updating CHANGELOG (Choose One)
+
+**Option 1: Manual Script (Recommended)**
+
+Use the provided script to automatically update CHANGELOG with versioning:
+
+```bash
+# Add changes to [Unreleased] section in docs/CHANGELOG.md
+# Then run:
+yarn changelog
+
+# Review the changes
+git diff docs/CHANGELOG.md
+
+# Commit and push
+git add docs/CHANGELOG.md package.json
+git commit -m "chore: update changelog for v2025.10.30-001"
+git push origin publish
+```
+
+The script (`scripts/update-changelog.sh`):
+- Generates version number based on date and git tags
+- Moves `[Unreleased]` content to new version section
+- Updates version comparison links
+- Resets `[Unreleased]` with empty subsections
+
+**Option 2: Manual Update**
+
+Manually edit `docs/CHANGELOG.md` before publishing:
+- Move `[Unreleased]` content to new `[VERSION]` section
+- Add release date
+- Reset `[Unreleased]` with empty subsections
+- Update comparison links at bottom
 
 #### Method 1: Push to `publish` branch (Recommended)
 
@@ -471,7 +573,12 @@ The project uses GitHub Actions for fully automated publishing:
 git checkout main
 git pull origin main
 
-# Update CHANGELOG.md [Unreleased] section with your changes
+# Update CHANGELOG.md (use yarn changelog or manual edit)
+yarn changelog
+
+# Commit changelog
+git add docs/CHANGELOG.md package.json
+git commit -m "chore: update changelog"
 
 # Push to publish branch to trigger release
 git checkout publish

@@ -1,0 +1,21 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Only run on publish branch
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$BRANCH" != "publish" ]; then
+  exit 0
+fi
+
+# Check if CHANGELOG has unreleased changes
+if grep -q "## \[Unreleased\]" docs/CHANGELOG.md; then
+  echo "📝 Updating CHANGELOG.md before commit..."
+  
+  # Generate version
+  DATE=$(date -u +"%Y.%-m.%-d")
+  VERSION="${DATE}-001"  # You'd need to calculate this properly
+  
+  echo "⚠️  CHANGELOG automation requires manual version calculation"
+  echo "Please update CHANGELOG.md manually or use GitHub Actions workflow"
+  exit 1
+fi

@@ -1,6 +1,10 @@
-# Directus GetStream Extension
+# Directus Extension [GetStream.io](https://getstream.io)
 
-Generate authentication tokens for Stream (GetStream) video calls in
+[![Publish to npm](https://github.com/AbhinayMe/directus-extension-getstream-io/actions/workflows/publish.yml/badge.svg)](https://github.com/AbhinayMe/directus-extension-getstream-io/actions/workflows/publish.yml)
+[![npm version](https://img.shields.io/npm/v/directus-extension-getstream-io.svg)](https://www.npmjs.com/package/directus-extension-getstream-io)
+[![npm downloads](https://img.shields.io/npm/dm/directus-extension-getstream-io.svg)](https://www.npmjs.com/package/directus-extension-getstream-io)
+
+Generate authentication tokens for Stream (https://getstream.io) video calls in
 Directus.
 
 ## Quick start
